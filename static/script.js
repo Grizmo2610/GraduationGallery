@@ -2,38 +2,88 @@ let images = [];
 let selected = [];
 let strict = false;
 
-// INIT
-document.addEventListener("DOMContentLoaded", () => {
-    images = JSON.parse(document.getElementById("data").dataset.images);
+let page = 1;
+let loading = false;
+let hasMore = true;
 
-    renderOptions();
-    renderGallery();
-    updateCounter();
+let allSubjects = [];
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadSubjects();
+    await loadMore();
+    setupScroll();
 });
 
-// ===== SIDEBAR MOBILE =====
-function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("overlay");
-
-    const open = sidebar.classList.contains("-translate-x-full");
-
-    if (open) {
-        sidebar.classList.remove("-translate-x-full");
-        overlay.classList.remove("hidden");
-    } else {
-        sidebar.classList.add("-translate-x-full");
-        overlay.classList.add("hidden");
-    }
+// ===== LOAD SUBJECTS =====
+async function loadSubjects() {
+    const res = await fetch("/api/subjects");
+    allSubjects = await res.json();
+    renderOptions();
 }
 
-// ===== FILTER OPTIONS =====
-function renderOptions() {
-    const set = new Set();
-    images.forEach(i => i.subjects.forEach(s => set.add(s)));
+// ===== LOAD IMAGES =====
+async function loadMore(reset = false) {
+    if (loading || (!hasMore && !reset)) return;
 
+    loading = true;
+
+    const params = new URLSearchParams({
+        page: page,
+        limit: 30,
+        selected: selected.join(","),
+        strict: strict ? "1" : "0"
+    });
+
+    const res = await fetch(`/api/images?${params}`);
+    const json = await res.json();
+
+    hasMore = json.has_more;
+    page++;
+
+    images = images.concat(json.data);
+
+    renderGallery();
+    loading = false;
+}
+
+// ===== RESET + FILTER =====
+function applyFilter() {
+    page = 1;
+    images = [];
+    hasMore = true;
+
+    document.getElementById("gallery").innerHTML = "";
+
+    loadMore(true);
+}
+
+// ===== SCROLL =====
+function setupScroll() {
+    window.addEventListener("scroll", () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+            loadMore();
+        }
+    });
+}
+
+// ===== TOGGLE FILTER =====
+function toggleSubject(s) {
+    selected = selected.includes(s)
+        ? selected.filter(x => x !== s)
+        : [...selected, s];
+
+    applyFilter();
+}
+
+function toggleStrict() {
+    strict = !strict;
+    applyFilter();
+}
+
+// ===== UI =====
+function renderOptions() {
     document.getElementById("optionsList").innerHTML =
-        [...set].map(s => `
+        allSubjects.map(s => `
             <label class="flex items-center gap-2 text-sm">
                 <input type="checkbox" onchange="toggleSubject('${s}')">
                 ${s}
@@ -41,12 +91,10 @@ function renderOptions() {
         `).join("");
 }
 
-// ===== GALLERY =====
 function renderGallery() {
     document.getElementById("gallery").innerHTML =
         images.map(img => `
-            <div class="gallery-card border border-white/10 rounded-xl overflow-hidden"
-                 data-subjects="${img.subjects.join(",")}">
+            <div class="gallery-card border border-white/10 rounded-xl overflow-hidden">
 
                 <img src="${img.img_src}" class="w-full h-56 object-cover">
 
@@ -66,44 +114,28 @@ function renderGallery() {
         `).join("");
 }
 
-// ===== FILTER =====
-function toggleSubject(s) {
-    selected = selected.includes(s)
-        ? selected.filter(x => x !== s)
-        : [...selected, s];
+document.addEventListener("click", async (e) => {
+    const el = e.target;
 
-    applyFilter();
-}
+    if (el.tagName === "A" && el.textContent.trim() === "Download") {
+        e.preventDefault();
 
-function toggleStrict() {
-    strict = !strict;
-    applyFilter();
-}
+        const url = el.href;
+        const filename = url.split("/").pop();
 
-function applyFilter() {
-    const cards = document.querySelectorAll(".gallery-card");
+        const res = await fetch(url);
+        const blob = await res.blob();
 
-    let visible = 0;
+        const blobUrl = URL.createObjectURL(blob);
 
-    cards.forEach(card => {
-        const subjects = card.dataset.subjects.split(",");
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
 
-        const ok = selected.length === 0
-            ? true
-            : (strict
-                ? selected.every(s => subjects.includes(s))
-                : selected.some(s => subjects.includes(s)));
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
 
-        card.style.display = ok ? "" : "none";
-        if (ok) visible++;
-    });
-
-    document.getElementById("imageCounter").textContent =
-        `${visible} / ${images.length} ảnh`;
-}
-
-// ===== COUNTER =====
-function updateCounter() {
-    document.getElementById("imageCounter").textContent =
-        `${images.length} ảnh`;
-}
+        URL.revokeObjectURL(blobUrl);
+    }
+});
