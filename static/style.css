@@ -1,0 +1,185 @@
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Card Animations */
+.gallery-card {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    animation: cardFadeIn 0.6s ease forwards;
+}
+
+@keyframes cardFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.gallery-card.hidden-card {
+    display: none;
+}
+
+/* Image hover zoom */
+.img-zoom {
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.gallery-card:hover .img-zoom {
+    transform: scale(1.08);
+}
+
+/* Card hover glow */
+.gallery-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.gallery-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px -15px rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Dropdown open state */
+.dropdown-open #dropdown {
+    opacity: 1 !important;
+    transform: scale(1) translateY(0) !important;
+    pointer-events: auto !important;
+}
+.dropdown-open #dropdownArrow {
+    transform: rotate(180deg);
+}
+
+/* Toggle active state */
+.toggle-active #toggleTrack {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
+}
+.toggle-active #toggleThumb {
+    transform: translateX(20px) !important;
+    background: white !important;
+}
+
+/* Checkbox custom */
+.custom-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+}
+.custom-checkbox:checked {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border-color: #8b5cf6;
+}
+.custom-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+.custom-checkbox:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* Skeleton loading */
+.skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 12px;
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Tag pill animation */
+.tag-pill {
+    animation: tagPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes tagPop {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Subject badge colors */
+.subject-badge {
+    transition: all 0.2s ease;
+}
+.subject-badge:hover {
+    filter: brightness(1.2);
+}
+
+/* Lightbox image animation */
+#lightboxImg {
+    transition: opacity 0.3s ease;
+}
+
+/* Toast animation */
+.toast-show {
+    opacity: 1 !important;
+    transform: translate(-50%, 0) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .gallery-card .card-actions {
+        flex-direction: column;
+    }
+    .gallery-card .card-actions a {
+        width: 100%;
+    }
+}
+
+/* Smooth filtering */
+.gallery-card.filter-hide {
+    animation: cardFadeOut 0.3s ease forwards;
+}
+@keyframes cardFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Action button hover effect */
+.action-btn {
+    position: relative;
+    overflow: hidden;
+}
+.action-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.action-btn:hover::before {
+    opacity: 1;
+}
+
+/* Overlay gradient on image */
+.img-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+}

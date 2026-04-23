@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery Pro</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        dark: { 300: '#0d0b17' },
+                        accent: { 500: '#8b5cf6' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="bg-dark-300 text-white font-sans min-h-screen">
+
+<div id="data" data-images='{{ images | tojson | safe }}'></div>
+
+<!-- HEADER -->
+<header class="relative z-20 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+
+        <!-- MOBILE MENU BUTTON -->
+        <button onclick="toggleSidebar()"
+            class="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg bg-white/5">
+            ☰
+        </button>
+
+        <h1 class="text-lg font-bold">Gallery Pro</h1>
+
+        <div id="imageCounter" class="text-sm text-gray-400"></div>
+    </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="max-w-7xl mx-auto px-4 py-6 flex gap-6">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar"
+        class="fixed lg:static top-0 left-0 h-full w-64 bg-dark-300 lg:bg-transparent border-r lg:border-none border-white/10 
+               transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-30">
+
+        <div class="p-4 lg:p-0 lg:sticky lg:top-4 bg-dark-100 lg:bg-transparent rounded-xl">
+
+            <div class="text-sm text-gray-400 mb-3">Filter</div>
+
+            <div id="optionsList" class="space-y-2 max-h-[70vh] overflow-auto"></div>
+
+            <button onclick="toggleStrict()"
+                class="mt-4 w-full px-3 py-2 bg-white/5 rounded-lg text-sm">
+                Chính xác
+            </button>
+
+        </div>
+    </aside>
+
+    <!-- OVERLAY MOBILE -->
+    <div id="overlay"
+        class="fixed inset-0 bg-black/60 hidden z-20 lg:hidden"
+        onclick="toggleSidebar()"></div>
+
+    <!-- GALLERY -->
+    <main class="flex-1 lg:ml-0">
+        <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+</div>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>

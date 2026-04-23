@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+ENV/
+.venv/
+.pytest_cache/
+.python-version
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+*.iml
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Ignore data and test folders
+data/
+test/
+
+# Frontend
+node_modules/
+dist/
+build/
+.env.local
+.env.*.local
+
+# Backend
+migration/
+*.sqlite3
+
+# Logs
+*.log
