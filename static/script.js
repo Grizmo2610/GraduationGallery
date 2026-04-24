@@ -8,11 +8,34 @@ let hasMore = true;
 
 let allSubjects = [];
 
+// ===== KHỞI TẠO =====
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadSubjects();
+    readParamsFromURL();   // Đọc URL trước
+    await loadSubjects();  // Load subjects (renderOptions sẽ tự tick checkbox)
     await loadMore();
     setupScroll();
 });
+
+// ===== ĐỌC PARAMS TỪ URL =====
+function readParamsFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const subjectParam = params.get("subject") || "";
+    selected = subjectParam ? subjectParam.split(",") : [];
+    strict = params.get("strict") === "1";
+}
+
+// ===== GHI PARAMS VÀO URL (không reload trang) =====
+function pushToURL() {
+    const params = new URLSearchParams();
+    if (selected.length > 0) params.set("subject", selected.join(","));
+    if (strict) params.set("strict", "1");
+
+    const newURL = params.toString()
+        ? `${window.location.pathname}?${params}`
+        : window.location.pathname;
+
+    window.history.pushState({}, "", newURL);
+}
 
 // ===== LOAD SUBJECTS =====
 async function loadSubjects() {
@@ -66,17 +89,30 @@ function setupScroll() {
     });
 }
 
+// ===== BACK/FORWARD BROWSER =====
+window.addEventListener("popstate", () => {
+    readParamsFromURL();
+    page = 1;
+    images = [];
+    hasMore = true;
+    document.getElementById("gallery").innerHTML = "";
+    renderOptions();   // Re-tick checkbox theo URL mới
+    loadMore(true);
+});
+
 // ===== TOGGLE FILTER =====
 function toggleSubject(s) {
     selected = selected.includes(s)
         ? selected.filter(x => x !== s)
         : [...selected, s];
 
+    pushToURL();
     applyFilter();
 }
 
 function toggleStrict() {
     strict = !strict;
+    pushToURL();
     applyFilter();
 }
 
@@ -85,7 +121,9 @@ function renderOptions() {
     document.getElementById("optionsList").innerHTML =
         allSubjects.map(s => `
             <label class="flex items-center gap-2 text-sm">
-                <input type="checkbox" onchange="toggleSubject('${s}')">
+                <input type="checkbox"
+                    ${selected.includes(s) ? "checked" : ""}
+                    onchange="toggleSubject('${s}')">
                 ${s}
             </label>
         `).join("");
