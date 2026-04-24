@@ -6,9 +6,11 @@ app = Flask(__name__)
 
 IMAGES_META_PATH = "images_data.json"
 OBJECTS_META_PATH = "objects_meta.json"
+IDS_PATH = "ids.json"
 
 _cache_images = None
 _cache_objects = None
+_cache_ids = None
 
 
 def load_json(path):
@@ -32,9 +34,17 @@ def get_objects():
     return _cache_objects
 
 
+def get_ids():
+    global _cache_ids
+    if _cache_ids is None:
+        _cache_ids = load_json(IDS_PATH) or {}
+    return _cache_ids
+
+
 def build_images():
     images_data = get_images()
     objects_meta = get_objects()
+    ids = get_ids()  # <-- thêm ids vào đây
 
     result = []
 
@@ -46,7 +56,11 @@ def build_images():
         for sid in subject_ids:
             obj = objects_meta.get(sid)
             if obj:
-                subjects.append(obj.get("name"))
+                raw_name = obj.get("name")
+                # Encode tên qua ids.json, giống api_subjects
+                encoded_name = ids.get(raw_name)
+                if encoded_name:
+                    subjects.append(encoded_name)
 
         filename = os.path.basename(image_path) if image_path else ""
 
@@ -78,7 +92,6 @@ def api_images():
 
     data = build_images()
 
-    # FILTER FULL DATASET
     if selected_list:
         filtered = []
         for img in data:
@@ -104,17 +117,22 @@ def api_images():
         "data": data[start:end]
     })
 
+
 @app.route("/api/subjects")
 def api_subjects():
     objects_meta = get_objects()
+    ids = get_ids()  # dùng cache thay vì mở file lại
 
-    subjects = [
-        obj["name"]
-        for obj in objects_meta.values()
-        if obj.get("name")
-    ]
+    subjects = []
+    for obj in objects_meta.values():
+        raw_name = obj.get("name")
+        if raw_name and raw_name in ids:
+            subjects.append(ids[raw_name])
 
-    return jsonify(sorted(set(subjects)))
+    subjects = list(set(subjects))
+    subjects.sort()
+
+    return jsonify(subjects)
 
 
 if __name__ == "__main__":
