@@ -21,7 +21,7 @@ ENV/
 
 # Jupyter Notebook
 .ipynb_checkpoints/
-*.ipynb
+# *.ipynb
 
 # Ignore data and test folders
 data/
